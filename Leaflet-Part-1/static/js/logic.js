@@ -6,7 +6,7 @@ let queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_we
 
 d3.json(queryUrl).then(function(data) {
   console.log(data);
-  createFeature(data.features);
+  createMarkers(data.features);
 });
 
 // Add a tile to the map = a background. Comes from OpenStreetmap
@@ -23,12 +23,6 @@ let map = L.map('map', {
   layers: [earthquakeMap]
   });   // center position + zoom
 
-// create a layer control, and pass it baseMaps and overlayMap. Adding the layers to the map
-
-L.control.layers(baseMaps, overlayMaps, {
-  collapsed: false
-}).addTo(map);
-
 
 // create a baseMaps objects to hold the streetmap layer
 
@@ -37,33 +31,38 @@ let baseMaps = {
 
 };
 
+// create a layer control, and pass it baseMaps and overlayMap. Adding the layers to the map
+
+L.control.layers(baseMaps, overlayMaps, {
+  collapsed: false
+}).addTo(map);
 
 // create an overlaysMaps object to hold the magnitude marker layers
 let overlayMaps = {};
 
-function createMarkers(features){
+function createMarkers(data){
 
   // pulling the cordinates from the features
-  let magnitude = features.geometry.coordinates;
+  let magnitude = data.geometry.coordinates;
 
   // Initialize an array to hold magnitude markers
   let magMarkers =[];
 
   // looping through the array.
-  for(let i=0; i < features.length; i++){
-    let magnitudes = features[i].geometry.coordinates;
+  for(let i=0; i < data.length; i++){
+    let magnitudes = magnitude[i];
      
-    let magMarker = L.markers([features[i].geometry.coordinates, features[i].geometry.coordinates])
-                     .bindPopup("<h3> Magnitude: " + magnitude + "</h3>");
+    let magMarker = L.marker([magnitudes[0], magnitudes[1]])
+                     .bindPopup("<h3> Status: " + features.properties.status + "</h3>");
 
     magMarkers.push(magMarker);
-}
+  }
 
 // Add the magMarkers layer to overlayMaps
 overlayMaps.Magnitude = L.layerGroup(magMarkers);
 
-// Add the overlayMaps to the layer control
-L.control.layers(baseMaps, overlayMaps, {
-  collapsed: false
-}).addTo(map);
 }
+
+
+
+
